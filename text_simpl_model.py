@@ -158,7 +158,7 @@ def prepareData(filename):
     return vocabulary, pairs
 
 
-vocabulary, pairs = prepareData('uniqueMaximum.txt')
+vocabulary, pairs = prepareData('data/uniqueMaximum.txt')
 print(random.choice(pairs))
 
 
