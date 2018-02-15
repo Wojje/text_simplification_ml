@@ -102,9 +102,3 @@ ENV/
 
 # Autosave files
 *~
-
-# Word embedding files
-word_embeddings/
-
-# Data files
-data/
