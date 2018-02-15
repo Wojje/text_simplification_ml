@@ -20,22 +20,24 @@ use_cuda = torch.cuda.is_available()
 import helper_modules.prepare_data as prepare_data
 import train_iter.train as train
 import eval_iter.evaluate as evaluate
-import helper_modules.vocabulary_helper as vocabulary_helper
+import helper_modules.vocabulary_helper_dict as vocabulary_helper
 import helper_modules.timer_helper as timer_helper
 import helper_modules.plotting_helper as plotting_helper
-from encoder.encoder_rnn import EncoderRNN
-from decoder.attn_decoder_rnn import AttnDecoderRNN
+from encoder.encoder_rnn_word_embeddings import EncoderRNN
+from decoder.attn_decoder_rnn_word_embeddings import AttnDecoderRNN
+#from decoder.attn_decoder_rnn import AttnDecoderRNN
 
 
 TEACHER_FORCING_RATIO = 0.5
 DROPOUT_P = 0.1
-N_ITERS = 75000
+N_ITERS = 1000
 HIDDEN_SIZE = 256
-PRINT_EVERY=1000
-PLOT_EVERY=100
+PRINT_EVERY=100
+PLOT_EVERY=10
 LEARNING_RATE=0.01
 
 DATA_FILE_PATH = 'data/uniqueMaximum.txt'
+EMBEDDINGS_FILE_PATH = 'word_embeddings/swectors-300dim.txt'
 MAX_LENGTH = 30
 STS_THRESHOLD = 0.8  #använd bara par med Sentence Similarity över 0.8
 
@@ -46,7 +48,7 @@ STS_THRESHOLD = 0.8  #använd bara par med Sentence Similarity över 0.8
 # =======================
 
 
-vocabulary, pairs = prepare_data.prepareData(DATA_FILE_PATH, max_length=MAX_LENGTH, sts_threshold=STS_THRESHOLD)
+vocabulary, pairs, embeddings = prepare_data.prepareDataAndWordEmbeddings(DATA_FILE_PATH, EMBEDDINGS_FILE_PATH, max_length=MAX_LENGTH, sts_threshold=STS_THRESHOLD)
 print(random.choice(pairs))
 
 
@@ -56,8 +58,9 @@ print(random.choice(pairs))
 #
 
 
-encoder = EncoderRNN(vocabulary.n_words, HIDDEN_SIZE)
-decoder = AttnDecoderRNN(HIDDEN_SIZE, vocabulary.n_words, dropout_p=DROPOUT_P, max_length=MAX_LENGTH)
+encoder = EncoderRNN(len(vocabulary), HIDDEN_SIZE, embedding_weights=embeddings)
+decoder = AttnDecoderRNN(HIDDEN_SIZE, len(vocabulary), embedding_weights=embeddings, dropout_p=DROPOUT_P, max_length=MAX_LENGTH)
+#decoder = AttnDecoderRNN(HIDDEN_SIZE, len(vocabulary), dropout_p=DROPOUT_P, max_length=MAX_LENGTH)
 
 if use_cuda:
     encoder = encoder.cuda()
@@ -87,7 +90,7 @@ for iter in range(1, N_ITERS + 1):
     target_variable = training_pair[1]
 
     loss = train.train(input_variable, target_variable, encoder,
-                 decoder, encoder_optimizer, decoder_optimizer, criterion, MAX_LENGTH, TEACHER_FORCING_RATIO)
+                 decoder, encoder_optimizer, decoder_optimizer, criterion, MAX_LENGTH, teacher_forcing_ratio=TEACHER_FORCING_RATIO)
     print_loss_total += loss
     plot_loss_total += loss
 
@@ -108,7 +111,7 @@ plotting_helper.showPlot(plot_losses)
 
 
 ######################################################################
-# EVALUATING
+# EVALUATION
 # =======================
 #
 

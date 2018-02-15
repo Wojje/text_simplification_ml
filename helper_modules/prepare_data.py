@@ -1,15 +1,12 @@
 import unicodedata
 import re
+import torchwordemb
 
 
 ######################################################################
-# Similar to the character encoding used in the character-level RNN
-# tutorials, we will be representing each word in a language as a one-hot
+# We will be representing each word in a language as a one-hot
 # vector, or giant vector of zeros except for a single one (at the index
-# of the word). Compared to the dozens of characters that might exist in a
-# language, there are many many more words, so the encoding vector is much
-# larger. We will however cheat a bit and trim the data to only use a few
-# thousand words per language.
+# of the word). 
 #
 # .. figure:: /_static/img/seq-seq-images/word-encoding.png
 #    :alt:
@@ -34,8 +31,8 @@ class Vocab:
         self.name = name
         self.word2index = {}
         self.word2count = {}
-        self.index2word = {0: "SOS", 1: "EOS"}
-        self.n_words = 2  # Count SOS and EOS
+        self.index2word = {}
+        self.n_words = 0
 
     def addSentence(self, sentence):
         for word in sentence.split(' '):
@@ -73,8 +70,8 @@ def unicodeToAscii(s):
 
 def normalizeString(s):
     s = unicodeToAscii(s.lower().strip())
-    s = re.sub(r"([.!?,;:])", r" \1", s)
-    #s = re.sub(r"[^a-zA-Z.!?,]+", r" ", s) #remove non-letter characters
+    s = re.sub(r"([.!?,:;])", r" \1", s)
+    s = re.sub(r"[^a-öA-Ö!?]+", r" ", s) #remove non-letter characters
     return s
 
 
@@ -120,7 +117,7 @@ def filterPairs(pairs, max_length):
 # -  Make word lists from sentences in pairs
 #
 
-def prepareData(filename, max_length=50, sts_threshold=0.5):
+def prepareData(filename, max_length=10, sts_threshold=0.5):
     vocabulary, triplets = readData(filename)
     print("Read %s sentence pairs" % len(triplets))
     pairs = [[normalizeString(s[1]), normalizeString(s[0])] for s in triplets if float(s[2])>sts_threshold]
@@ -128,9 +125,32 @@ def prepareData(filename, max_length=50, sts_threshold=0.5):
     pairs = filterPairs(pairs, max_length)
     print("Trimmed to %s sentence pairs" % len(pairs))
     print("Counting words...")
+    vocabulary.addWord("<SOS>")
+    vocabulary.addWord("<EOS>")
     for pair in pairs:
         vocabulary.addSentence(pair[0])
         vocabulary.addSentence(pair[1])
     print("Counted words:")
     print(vocabulary.name, vocabulary.n_words)
     return vocabulary, pairs
+
+
+
+def prepareDataAndWordEmbeddings(data_filename, embedding_weights_filename, max_length=10, sts_threshold=0.5):
+    _, triplets = readData(data_filename)
+    print("Read %s sentence pairs" % len(triplets))
+    pairs = [[normalizeString(s[1]), normalizeString(s[0])] for s in triplets if float(s[2])>sts_threshold]
+    print("Number of sentence pairs with Sentence Similarity above %s: %s" % (sts_threshold, len(pairs)))
+    pairs = filterPairs(pairs, max_length)
+    print("Trimmed to %s sentence pairs" % len(pairs))
+    vocab_dict, embeddings = torchwordemb.load_word2vec_text(embedding_weights_filename)
+#    vocabulary = Vocab(embedding_weights_filename)
+#    for w in vocab_dict:
+#        vocabulary.addWord(w)
+#    print("Vocabulary size:")
+#    print(vocabulary.name, vocabulary.n_words)
+#    return vocabulary, pairs, embeddings
+    print("Vocabulary size:")
+    print(len(vocab_dict))
+    return vocab_dict, pairs, embeddings
+

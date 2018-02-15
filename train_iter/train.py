@@ -44,7 +44,7 @@ EOS_token = 1
 #
 
 
-def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, max_length, teacher_forcing_ratio):
+def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, max_length, teacher_forcing_ratio=1):
     encoder_hidden = encoder.initHidden()
 
     encoder_optimizer.zero_grad()
