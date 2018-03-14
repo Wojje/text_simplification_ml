@@ -83,17 +83,21 @@ class AttnDecoderRNN(nn.Module):
     def __init__(self, hidden_size, output_size, embedding_weights, num_layers=1, dropout_p=0.1, max_length=10):
         super(AttnDecoderRNN, self).__init__()
         self.hidden_size = hidden_size
+        self.attn_layer_size = hidden_size
         self.output_size = output_size
         self.dropout_p = dropout_p
         self.max_length = max_length
         embed_num = embedding_weights.size(0)
         embed_dim = embedding_weights.size(1)
         self.embedding = nn.Embedding(embed_num, embed_dim)
+        self.embedding.weight = nn.Parameter(embedding_weights)
+#        for param in self.embedding.parameters():
+#            param.requires_grad = False
         self.attn = nn.Linear(self.hidden_size + embed_dim, self.max_length)
-        self.attn_combine = nn.Linear(self.hidden_size + embed_dim, embed_dim)
-        self.gru = nn.GRU(embed_dim, self.hidden_size, num_layers)
+        self.attn_combine = nn.Linear(self.hidden_size + embed_dim, self.attn_layer_size)
+        self.lstm = nn.LSTM(self.attn_layer_size, self.hidden_size, num_layers)
         self.dropout = nn.Dropout(self.dropout_p)
-        self.out = nn.Linear(self.hidden_size, self.output_size)
+        self.out = nn.Linear(self.hidden_size, embed_num)
 
     def forward(self, input, hidden, encoder_outputs):
         embedded = self.embedding(input).view(1, 1, -1)
@@ -103,7 +107,8 @@ class AttnDecoderRNN(nn.Module):
 #        print("encoder_outputs: " + str(encoder_outputs.size()))
 
         attn_weights = F.softmax(
-            self.attn(torch.cat((embedded[0], hidden[0]), 1)), dim=1)
+            self.attn(torch.cat((embedded[0], hidden[0][0]), 1)), dim=1)
+#        print(torch.cat((embedded[0], hidden[0]), 1))
 #        print("attn_weights: " + str(attn_weights.size()))
 #        print("hidden: " + str(hidden.size()))
         attn_applied = torch.bmm(attn_weights.unsqueeze(0),
@@ -117,7 +122,7 @@ class AttnDecoderRNN(nn.Module):
 
         output = F.relu(output)
 #        print("output3: " + str(output.size()))
-        output, hidden = self.gru(output, hidden)
+        output, hidden = self.lstm(output, hidden)
 #        print("output4: " + str(output.size()))
 
         output = F.log_softmax(self.out(output[0]), dim=1)
@@ -125,7 +130,8 @@ class AttnDecoderRNN(nn.Module):
         return output, hidden, attn_weights
 
     def initHidden(self):
-        result = Variable(torch.zeros(1, 1, self.hidden_size))
+        result = [Variable(torch.zeros(1, 1, self.hidden_size)),
+                  Variable(torch.zeros(1, 1, self.hidden_size))]
         if use_cuda:
             return result.cuda()
         else:

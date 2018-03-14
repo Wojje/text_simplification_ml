@@ -65,16 +65,17 @@ class EncoderRNN(nn.Module):
         embed_dim = embedding_weights.size(1)
         self.embedding = nn.Embedding(embed_num, embed_dim)
         self.embedding.weight = nn.Parameter(embedding_weights)
-        self.gru = nn.GRU(embed_dim, hidden_size, num_layers)
+        self.lstm = nn.LSTM(embed_dim, hidden_size, num_layers)
 
     def forward(self, input, hidden):
         embedded = self.embedding(input).view(1, 1, -1)
         output = embedded
-        output, hidden = self.gru(output, hidden)
+        output, hidden = self.lstm(output, hidden)
         return output, hidden
 
     def initHidden(self):
-        result = Variable(torch.zeros(1, 1, self.hidden_size))
+        result = [Variable(torch.zeros(1, 1, self.hidden_size)),
+                  Variable(torch.zeros(1, 1, self.hidden_size))]
         if use_cuda:
             return result.cuda()
         else:

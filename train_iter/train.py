@@ -9,6 +9,14 @@ from torch.autograd import Variable
 import torch
 import torch.nn as nn
 
+
+import io
+import numpy as np
+import torch.utils.model_zoo as model_zoo
+import torch.onnx
+import torch.nn.init as init
+
+
 use_cuda = torch.cuda.is_available()
 
 SOS_token = 0
@@ -58,6 +66,14 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, 
 
     loss = 0
 
+#    encoder.train(False)
+#    input_tuple = (input_variable[0], encoder_hidden)
+    # Export the model
+#    torch_out = torch.onnx._export(encoder,             # model being run
+#                                   input_tuple,                       # model input (or a tuple for multiple inputs)
+#                                   "text_simpl_enc_attn_emb.onnx", # where to save the model (can be a file or file-like object)
+#                                   export_params=True)
+
     for ei in range(input_length):
         encoder_output, encoder_hidden = encoder(
             input_variable[ei], encoder_hidden)
@@ -75,6 +91,8 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, 
         for di in range(target_length):
             decoder_output, decoder_hidden, decoder_attention = decoder(
                 decoder_input, decoder_hidden, encoder_outputs)
+#            print("decoder_output" + str(decoder_output.size()))
+#            print("target_variable[di]" + str(target_variable[di].size()))
             loss += criterion(decoder_output, target_variable[di])
             decoder_input = target_variable[di]  # Teacher forcing
 
@@ -83,12 +101,13 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, 
         for di in range(target_length):
             decoder_output, decoder_hidden, decoder_attention = decoder(
                 decoder_input, decoder_hidden, encoder_outputs)
+#            print("decoder_output" + str(decoder_output.size()))
+#            print("target_variable[di]" + str(target_variable[di].size()))
             topv, topi = decoder_output.data.topk(1)
             ni = topi[0][0]
 
             decoder_input = Variable(torch.LongTensor([[ni]]))
             decoder_input = decoder_input.cuda() if use_cuda else decoder_input
-
             loss += criterion(decoder_output, target_variable[di])
             if ni == EOS_token:
                 break

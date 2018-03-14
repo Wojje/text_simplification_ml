@@ -80,25 +80,17 @@ import torch.nn.functional as F
 import torch.nn as nn
 
 class AttnDecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size, num_layers=1, dropout_p=0.1, max_length=10, embedding_weights=None):
+    def __init__(self, hidden_size, output_size, embedding_weights, num_layers=1, dropout_p=0.1, max_length=10):
         super(AttnDecoderRNN, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.dropout_p = dropout_p
         self.max_length = max_length
 
-        if embedding_weights == None:
-            self.embedding = nn.Embedding(self.output_size, self.hidden_size)
-            self.attn = nn.Linear(self.hidden_size * 2, self.max_length)
-            self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
-            self.gru = nn.GRU(self.hidden_size, self.hidden_size, num_layers)
-        else:
-            embed_num = embedding_weights.size(0)
-            embed_dim = embedding_weights.size(1)
-            self.embedding = nn.Embedding(embed_num, embed_dim)
-            self.attn = nn.Linear(self.hidden_size + embed_dim, self.max_length)
-            self.attn_combine = nn.Linear(self.hidden_size + embed_dim, self.hidden_size)
-            self.gru = nn.GRU(embed_dim, self.hidden_size, num_layers)
+        self.embedding = nn.Embedding(self.output_size, self.hidden_size)
+        self.attn = nn.Linear(self.hidden_size * 2, self.max_length)
+        self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
+        self.gru = nn.GRU(self.hidden_size, self.hidden_size, num_layers)
 
         self.dropout = nn.Dropout(self.dropout_p)
         self.out = nn.Linear(self.hidden_size, self.output_size)

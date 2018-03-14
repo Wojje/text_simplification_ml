@@ -102,3 +102,6 @@ ENV/
 
 # Autosave files
 *~
+
+# graph folder
+visualization/

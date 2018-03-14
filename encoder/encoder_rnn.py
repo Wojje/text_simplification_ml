@@ -57,19 +57,12 @@ import torch.nn as nn
 use_cuda = torch.cuda.is_available()
 
 class EncoderRNN(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers=1, embedding_weights=None):
+    def __init__(self, input_size, hidden_size, embedding_weights, num_layers=1):
         super(EncoderRNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        if embedding_weights == None:
-            self.embedding = nn.Embedding(input_size, hidden_size)
-            self.gru = nn.GRU(hidden_size, hidden_size, num_layers)
-        else:
-            embed_num = embedding_weights.size(0)
-            embed_dim = embedding_weights.size(1)
-            self.embedding = nn.Embedding(embed_num, embed_dim)
-            self.embedding.weight = nn.Parameter(embedding_weights)
-            self.gru = nn.GRU(embed_dim, hidden_size, num_layers)
+        self.embedding = nn.Embedding(input_size, hidden_size)
+        self.gru = nn.GRU(hidden_size, hidden_size, num_layers)
 
     def forward(self, input, hidden):
         embedded = self.embedding(input).view(1, 1, -1)

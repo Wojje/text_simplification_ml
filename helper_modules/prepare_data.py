@@ -71,7 +71,7 @@ def unicodeToAscii(s):
 def normalizeString(s):
     s = unicodeToAscii(s.lower().strip())
     s = re.sub(r"([.!?,:;])", r" \1", s)
-    s = re.sub(r"[^a-öA-Ö!?]+", r" ", s) #remove non-letter characters
+    s = re.sub(r"[^a-öA-Ö.!?]+", r" ", s) #remove non-letter characters
     return s
 
 
@@ -144,13 +144,10 @@ def prepareDataAndWordEmbeddings(data_filename, embedding_weights_filename, max_
     pairs = filterPairs(pairs, max_length)
     print("Trimmed to %s sentence pairs" % len(pairs))
     vocab_dict, embeddings = torchwordemb.load_word2vec_text(embedding_weights_filename)
-#    vocabulary = Vocab(embedding_weights_filename)
-#    for w in vocab_dict:
-#        vocabulary.addWord(w)
-#    print("Vocabulary size:")
-#    print(vocabulary.name, vocabulary.n_words)
-#    return vocabulary, pairs, embeddings
+    vocabulary = Vocab(embedding_weights_filename)
+    for w in vocab_dict:
+        vocabulary.addWord(w)
     print("Vocabulary size:")
-    print(len(vocab_dict))
-    return vocab_dict, pairs, embeddings
+    print(vocabulary.name, vocabulary.n_words)
+    return vocabulary, pairs, embeddings
 
