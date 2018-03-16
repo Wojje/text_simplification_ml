@@ -133,7 +133,7 @@ class AttnDecoderRNN(nn.Module):
         result = [Variable(torch.zeros(1, 1, self.hidden_size)),
                   Variable(torch.zeros(1, 1, self.hidden_size))]
         if use_cuda:
-            return result.cuda()
+            return [result[0].cuda(), result[1].cuda()]
         else:
             return result
 
