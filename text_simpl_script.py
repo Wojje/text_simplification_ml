@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Modified from: `Sean Robertson <https://github.com/spro/practical-pytorch>`_
