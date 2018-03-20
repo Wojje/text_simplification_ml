@@ -51,6 +51,7 @@ LEARNING_RATE=0.01
 DATA_FILE_PATH = 'data/uniqueMaximum.txt'
 EMBEDDINGS_FILE_PATH = 'word_embeddings/swectors-300dim.txt'
 MAX_LENGTH = 30
+VOCAB_SIZE = 90000
 STS_THRESHOLD = 0.6  #använd bara par med Sentence Similarity över 0.6
 
 start_iter = 1
@@ -66,7 +67,7 @@ eval_scores = []
 # =======================
 
 
-vocabulary, pairs, embeddings = prepare_data.prepareDataAndWordEmbeddings(DATA_FILE_PATH, EMBEDDINGS_FILE_PATH, max_length=MAX_LENGTH, sts_threshold=STS_THRESHOLD)
+vocabulary, pairs, embeddings = prepare_data.prepareDataAndWordEmbeddings(DATA_FILE_PATH, EMBEDDINGS_FILE_PATH, max_length=MAX_LENGTH, sts_threshold=STS_THRESHOLD, vocab_limit=VOCAB_SIZE)
 print(random.choice(pairs))
 indices = list(range(len(pairs)))
 random.shuffle(indices)

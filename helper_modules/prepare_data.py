@@ -117,7 +117,7 @@ def filterPairs(pairs, max_length):
 # -  Make word lists from sentences in pairs
 #
 
-def prepareData(filename, max_length=10, sts_threshold=0.5):
+def prepareData(filename, max_length=10, sts_threshold=0.5, vocab_limit=None):
     vocabulary, triplets = readData(filename)
     print("Read %s sentence pairs" % len(triplets))
     pairs = [[normalizeString(s[1]), normalizeString(s[0])] for s in triplets if float(s[2])>sts_threshold]
@@ -127,7 +127,7 @@ def prepareData(filename, max_length=10, sts_threshold=0.5):
     print("Counting words...")
     vocabulary.addWord("<SOS>")
     vocabulary.addWord("<EOS>")
-    for pair in pairs:
+    for pair in pairs[:vocab_limit]:
         vocabulary.addSentence(pair[0])
         vocabulary.addSentence(pair[1])
     print("Counted words:")
