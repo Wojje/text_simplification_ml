@@ -84,7 +84,7 @@ cut2 = int(len(pairs)*0.9)
 
 encoder = EncoderRNN(vocabulary.n_words, HIDDEN_SIZE, embedding_weights=embeddings)
 decoder = AttnDecoderRNN(HIDDEN_SIZE, vocabulary.n_words, embedding_weights=embeddings, dropout_p=DROPOUT_P, max_length=MAX_LENGTH)
-# TODO Frys de förtränade word embeddingvikterna så att de inte tränas.
+# TODO Implementera möjlighet för flera layers.
 for param in encoder.embedding.parameters():
     param.requires_grad = False
 for param in decoder.embedding.parameters():
@@ -157,7 +157,13 @@ for iter in range(start_iter, N_ITERS + 1):
         print_loss_total = 0
         print('%s (%d %d%%) %.4f' % (timer_helper.timeSince(start, iter / N_ITERS),
                                      iter, iter / N_ITERS * 100, print_loss_avg))
-        evaluateRandomly(encoder,decoder,n=1)
+        pair = random.choice(pairs)
+        print('>', pair[0])
+        print('=', pair[1])
+        output_words, attentions = evaluate.evaluate(encoder, decoder, pair[0], vocabulary, max_length=MAX_LENGTH)
+        output_sentence = ' '.join(output_words)
+        print('<', output_sentence)
+        print('')
 
     if iter % PLOT_EVERY == 0:
         plot_loss_avg = plot_loss_total / PLOT_EVERY

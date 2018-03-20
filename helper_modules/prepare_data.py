@@ -145,9 +145,9 @@ def prepareDataAndWordEmbeddings(data_filename, embedding_weights_filename, max_
     print("Trimmed to %s sentence pairs" % len(pairs))
     vocab_dict, embeddings = torchwordemb.load_word2vec_text(embedding_weights_filename)
     vocabulary = Vocab(embedding_weights_filename)
-    for w in list(vocab_dict.values())[:vocab_limit]:
+    for w in list(vocab_dict.keys())[:vocab_limit]:
         vocabulary.addWord(w)
     print("Vocabulary size:")
     print(vocabulary.name, vocabulary.n_words)
-    return vocabulary, pairs, embeddings
+    return vocabulary, pairs, embeddings[:vocab_limit]
 
