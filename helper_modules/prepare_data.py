@@ -136,7 +136,7 @@ def prepareData(filename, max_length=10, sts_threshold=0.5, vocab_limit=None):
 
 
 
-def prepareDataAndWordEmbeddings(data_filename, embedding_weights_filename, max_length=10, sts_threshold=0.5):
+def prepareDataAndWordEmbeddings(data_filename, embedding_weights_filename, max_length=10, sts_threshold=0.5, vocab_limit=None):
     _, triplets = readData(data_filename)
     print("Read %s sentence pairs" % len(triplets))
     pairs = [[normalizeString(s[1]), normalizeString(s[0])] for s in triplets if float(s[2])>sts_threshold]
@@ -145,7 +145,7 @@ def prepareDataAndWordEmbeddings(data_filename, embedding_weights_filename, max_
     print("Trimmed to %s sentence pairs" % len(pairs))
     vocab_dict, embeddings = torchwordemb.load_word2vec_text(embedding_weights_filename)
     vocabulary = Vocab(embedding_weights_filename)
-    for w in vocab_dict:
+    for w in list(vocab_dict.values())[:vocab_limit]:
         vocabulary.addWord(w)
     print("Vocabulary size:")
     print(vocabulary.name, vocabulary.n_words)
