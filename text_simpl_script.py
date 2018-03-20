@@ -42,11 +42,11 @@ args = parser.parse_args()
 
 TEACHER_FORCING_RATIO = 0.5
 DROPOUT_P = 0.1
-N_ITERS = 75000
+N_ITERS = 80000
 HIDDEN_SIZE = 1024
 PRINT_EVERY=1000
 PLOT_EVERY=100
-CHECKPOINT_AND_EVALUATE_EVERY=1000
+CHECKPOINT_AND_EVALUATE_EVERY=2000
 LEARNING_RATE=0.01
 
 DATA_FILE_PATH = 'data/uniqueMaximum.txt'
@@ -172,7 +172,7 @@ for iter in range(start_iter, N_ITERS + 1):
 
     if iter % CHECKPOINT_AND_EVALUATE_EVERY == 0:
         score = 0
-        n_validation_pairs = len(validate_set)
+        n_validation_pairs = 100
         for pair in [random.choice(validate_set) for _ in range(n_validation_pairs)]:
             output_words, attentions = evaluate.evaluate(encoder, decoder, pair[0], vocabulary, max_length=MAX_LENGTH)
             score += nltk.translate.bleu_score.sentence_bleu([pair[1]], output_words)
