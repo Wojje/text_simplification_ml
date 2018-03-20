@@ -167,13 +167,9 @@ for iter in range(start_iter, N_ITERS + 1):
     if iter % CHECKPOINT_AND_EVALUATE_EVERY == 0:
         score = 0
         n_validation_pairs = len(validate_set)
-        encoder.eval()
-        decoder.eval()
         for pair in [random.choice(validate_set) for _ in range(n_validation_pairs)]:
             output_words, attentions = evaluate.evaluate(encoder, decoder, pair[0], vocabulary, max_length=MAX_LENGTH)
             score += nltk.translate.bleu_score.sentence_bleu([pair[1]], output_words)
-        encoder.train()
-        decoder.train()
         eval_score = score / n_validation_pairs
         eval_scores.append(eval_score)
         is_best = eval_score > best_eval_score

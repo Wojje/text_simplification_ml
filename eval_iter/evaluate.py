@@ -23,6 +23,8 @@ SOS_token = 0
 EOS_token = 1
 
 def evaluate(encoder, decoder, sentence, vocabulary, max_length=50):
+    encoder.eval()
+    decoder.eval()
     input_variable = vocabulary_helper.variableFromSentence(vocabulary, sentence)
     input_length = input_variable.size()[0]
     encoder_hidden = encoder.initHidden()
@@ -58,5 +60,7 @@ def evaluate(encoder, decoder, sentence, vocabulary, max_length=50):
         decoder_input = Variable(torch.LongTensor([[ni]]))
         decoder_input = decoder_input.cuda() if use_cuda else decoder_input
 
+    encoder.train()
+    decoder.train()
     return decoded_words, decoder_attentions[:di + 1]
 
