@@ -157,7 +157,7 @@ for iter in range(start_iter, N_ITERS + 1):
         print_loss_total = 0
         print('%s (%d %d%%) %.4f' % (timer_helper.timeSince(start, iter / N_ITERS),
                                      iter, iter / N_ITERS * 100, print_loss_avg))
-        pair = random.choice(pairs)
+        pair = random.choice(validate_set)
         print('>', pair[0])
         print('=', pair[1])
         output_words, attentions = evaluate.evaluate(encoder, decoder, pair[0], vocabulary, max_length=MAX_LENGTH)
