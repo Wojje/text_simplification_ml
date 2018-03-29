@@ -49,9 +49,12 @@ PLOT_EVERY=100
 CHECKPOINT_AND_EVALUATE_EVERY=2000
 LEARNING_RATE=0.01
 
-DATA_FILE_PATH = 'data/uniqueMaximum.txt'
-EMBEDDINGS_FILE_PATH = 'word_embeddings/swectors-300dim.txt'
-MAX_LENGTH = 30
+#DATA_FILE_PATH = 'data/uniqueMaximum.txt'
+DATA_FILE_PATH = 'data/'
+#EMBEDDINGS_FILE_PATH = 'word_embeddings/swectors-300dim.txt'
+EMBEDDINGS_FILE_PATH = 'word_embeddings/glove.6B.300d.txt'
+GLOVE = True
+MAX_LENGTH = 50
 VOCAB_SIZE = 90000
 STS_THRESHOLD = 0.6  #använd bara par med Sentence Similarity över 0.6
 
@@ -68,7 +71,7 @@ eval_scores = []
 # =======================
 
 
-vocabulary, pairs, embeddings = prepare_data.prepareDataAndWordEmbeddings(DATA_FILE_PATH, EMBEDDINGS_FILE_PATH, max_length=MAX_LENGTH, sts_threshold=STS_THRESHOLD, vocab_limit=VOCAB_SIZE)
+vocabulary, pairs, embeddings = prepare_data.prepareDataAndWordEmbeddings_SEW(DATA_FILE_PATH, EMBEDDINGS_FILE_PATH, max_length=MAX_LENGTH, sts_threshold=STS_THRESHOLD, vocab_limit=VOCAB_SIZE)
 print(random.choice(pairs))
 indices = list(range(len(pairs)))
 random.shuffle(indices)
@@ -176,6 +179,7 @@ for iter in range(start_iter, N_ITERS + 1):
         for pair in [random.choice(validate_set) for _ in range(n_validation_pairs)]:
             output_words, attentions = evaluate.evaluate(encoder, decoder, pair[0], vocabulary, max_length=MAX_LENGTH)
             score += nltk.translate.bleu_score.sentence_bleu([pair[1]], output_words)
+#TODO: Få BLEU att funka. Använd andra metrics också.
         eval_score = score / n_validation_pairs
         eval_scores.append(eval_score)
         is_best = eval_score > best_eval_score

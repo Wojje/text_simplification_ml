@@ -7,8 +7,7 @@ SOS_token = 0
 EOS_token = 1
 
 def indexesFromSentence(vocabulary, sentence):
-    return [vocabulary.word2index[word] for word in sentence.split(' ') if vocabulary.word2index.get(word)!=None]
-#TODO ändra så att ord inte i vokabuläret ersätts av en speciell token och inte bara slängs bort
+    return [vocabulary.word2index[word] if vocabulary.word2index.get(word)!=None else vocabulary.word2index["<UNK>"] for word in sentence.split(' ')]
 
 def variableFromSentence(vocabulary, sentence):
     indexes = indexesFromSentence(vocabulary, sentence)

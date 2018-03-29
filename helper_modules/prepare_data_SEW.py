@@ -14,6 +14,8 @@ import torchwordemb
 #
 
 
+#TODO Använd en dsitributional word embedding, till exempel word2vec eller GloVe istället för one-hot vector.
+
 
 ######################################################################
 # We'll need a unique index per word to use as the inputs and targets of
@@ -69,7 +71,6 @@ def unicodeToAscii(s):
 def normalizeString(s):
     s = unicodeToAscii(s.lower().strip())
     s = re.sub(r"([.!?,:;])", r" \1", s)
-    s = re.sub(r"([0-9]+)", r"<NUM>", s)
     s = re.sub(r"[^a-öA-Ö.!?]+", r" ", s) #remove non-letter characters
     return s
 
@@ -135,7 +136,7 @@ def prepareData(filename, max_length=10, sts_threshold=0.5, vocab_limit=None):
 
 
 
-def prepareDataAndWordEmbeddings(data_filename, embedding_weights_filename, max_length=10, sts_threshold=0.5, vocab_limit=None):
+def prepareDataAndWordEmbeddings(data_filename, embedding_weights_filename, glove=False, word2vec=True, max_length=10, sts_threshold=0.5, vocab_limit=None):
     _, triplets = readData(data_filename)
     print("Read %s sentence pairs" % len(triplets))
     pairs = [[normalizeString(s[1]), normalizeString(s[0])] for s in triplets if float(s[2])>sts_threshold]
@@ -150,21 +151,3 @@ def prepareDataAndWordEmbeddings(data_filename, embedding_weights_filename, max_
     print(vocabulary.name, vocabulary.n_words)
     return vocabulary, pairs, embeddings[:vocab_limit]
 
-def prepareDataAndWordEmbeddings_SEW(data_filename, embedding_weights_filename, max_length=10, sts_threshold=0.5, vocab_limit=None):
-    _, triplets_normal = readData(data_filename + "normal.aligned")
-    _, triplets_simple = readData(data_filename + "simple.aligned")
-    print("Read %s sentence pairs" % len(triplets_normal))
-    sentences_normal = [normalizeString(s[2]) for s in triplets_normal]
-    sentences_simple = [normalizeString(s[2]) for s in triplets_simple]
-    pairs = []
-    for x in range(len(sentences_normal)):
-        pairs.append([sentences_normal[x],sentences_simple[x]])
-    pairs = filterPairs(pairs, max_length)
-    print("Trimmed to %s sentence pairs" % len(pairs))
-    vocab_dict, embeddings = torchwordemb.load_glove_text(embedding_weights_filename)
-    vocabulary = Vocab(embedding_weights_filename)
-    for w in list(vocab_dict.keys())[:vocab_limit]:
-        vocabulary.addWord(w)
-    print("Vocabulary size:")
-    print(vocabulary.name, vocabulary.n_words)
-    return vocabulary, pairs, embeddings[:vocab_limit]

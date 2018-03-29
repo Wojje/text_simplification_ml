@@ -14,7 +14,7 @@ import torch.nn as nn
 
 use_cuda = torch.cuda.is_available()
 
-import helper_modules.prepare_data as prepare_data
+import helper_modules.prepare_data_swedish as prepare_data
 import eval_iter.evaluate as evaluate
 import helper_modules.vocabulary_helper as vocabulary_helper
 import helper_modules.plotting_helper as plotting_helper
