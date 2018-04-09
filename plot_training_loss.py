@@ -38,13 +38,10 @@ PLOT_EVERY=100
 CHECKPOINT_AND_EVALUATE_EVERY=2000
 LEARNING_RATE=0.01
 
-#DATA_FILE_PATH = 'data/uniqueMaximum.txt'
 DATA_FILE_PATH = 'data/'
-#EMBEDDINGS_FILE_PATH = 'word_embeddings/swectors-300dim.txt'
 EMBEDDINGS_FILE_PATH = 'word_embeddings/glove.6B.300d.txt'
-GLOVE = True
 MAX_LENGTH = 50
-VOCAB_SIZE = None
+VOCAB_SIZE = 90000
 STS_THRESHOLD = 0.6  #använd bara par med Sentence Similarity över 0.6
 
 start_iter = 1
@@ -114,52 +111,9 @@ print("=> loaded checkpoint '{}' (iteration {})"
 validate_set = [pairs[i] for i in indices[cut:cut2]]
 #test_set = [pairs[i] for i in indices[cut2:]]
 
-def showAttention(input_sentence, output_words, attentions):
-    # Set up figure with colorbar
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    cax = ax.matshow(attentions.numpy(), cmap='bone')
-    fig.colorbar(cax)
+plt.plot(training_losses)
+plt.show()
 
-    # Set up axes
-    ax.set_xticklabels([''] + input_sentence.split(' ') +
-                       ['<EOS>'], rotation=90)
-    ax.set_yticklabels([''] + output_words)
+plt.plot(eval_scores)
+plt.show()
 
-    # Show label at every tick
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
-
-    plt.show()
-
-
-stop = False
-while not stop:
-    input_sentence = input('Type a sentence or leave blank to randomly select one from the validation set: ')
-    input_sentence = prepare_data.normalizeString(input_sentence)
-    if not input_sentence:
-        pair = random.choice(validate_set)
-        print('>', pair[0])
-        print('=', pair[1])
-        input_sentence = pair[0]
-    output_words, attentions = evaluate.evaluate(encoder, decoder, input_sentence, vocabulary, max_length=MAX_LENGTH)
-    output_sentence = ' '.join(output_words)
-    print('<', output_sentence)
-    print('')
-    showAttention(input_sentence, output_words, attentions)
-    stop = input('Type any character to stop. Enter to continue. ')
-    if stop:
-        confirmed = False
-        while not confirmed:
-            stop = input('Are you sure you want to exit the program? [y/N] ')
-            if stop not in ['y', 'Y', 'n', 'N'] and stop:
-                print('please enter y or n.')
-                confirmed = False
-            elif stop == 'y' or stop == 'Y':
-                stop = True
-                confirmed = True
-            elif stop == 'n' or stop == 'N':
-                stop = False
-                confirmed = True
-            else:
-                confirmed = True
